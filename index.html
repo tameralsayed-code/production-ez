@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>قسم الإنتاج | V23 Stable</title>
+    <title>قسم الإنتاج | V24 Stable</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -84,7 +84,6 @@
 
     <div id="modalOverlay" class="sheet-overlay" onclick="window.history.back()"></div>
 
-    <!-- FORM SHEET -->
     <div id="sheetForm" class="sheet-container overflow-hidden">
         <div class="p-6 flex justify-between items-center border-b border-gray-100">
             <h2 id="uiFormTitle" class="text-lg font-bold">بيانات الموظف</h2>
@@ -107,7 +106,6 @@
         </div>
     </div>
 
-    <!-- DETAILS SHEET -->
     <div id="sheetDetails" class="sheet-container p-8 shadow-2xl"><div id="uiDetailsContent"></div></div>
 
     <script>
@@ -153,13 +151,12 @@
                     onValue(ref(db, 'employees'), (snapshot) => {
                         const data = snapshot.val();
                         const list = data ? Object.values(data).filter(e => e && e.name) : [];
-                        // ترتيب البيانات حسب الحقل sortOrder
                         App.State.employees = list.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
                         App.UI.updateAll(false);
                     });
                 },
 
-                updateAll(pushToHistory = true) {
+                updateAll(pushState = true) {
                     const { view, shift, query, employees, isModalOpen } = App.State;
                     const live = App.ShiftEngine.getLiveNow();
                     
@@ -176,10 +173,7 @@
                     document.getElementById('uiMainTitle').innerText = query ? 'البحث' : (shift === 'office' ? 'طاقم الإدارة' : shift ? `وردية ${shift}` : 'قسم الإنتاج');
                     
                     lucide.createIcons();
-
-                    if (pushToHistory) {
-                        history.pushState({ view, shift, query, modal: isModalOpen }, "");
-                    }
+                    if (pushState) history.pushState({ view, shift, query, modal: isModalOpen }, "");
                 },
 
                 renderHome(employees, live) {
@@ -191,17 +185,17 @@
                         </div>
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50">
                             <div onclick="App.Core.navigate('management')" class="p-4 flex justify-between items-center active:bg-gray-50 cursor-pointer">
-                                <div class="flex items-center gap-4"><div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center"><i data-lucide="briefcase"></i></div><div><h2 class="font-bold">إدارة الإنتاج</h2><p class="text-xs text-gray-500">${c('management')} موظف</p></div></div><i data-lucide="chevron-left" class="w-4 h-4 text-gray-400"></i>
+                                <div class="flex items-center gap-4 flex-1"><div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center"><i data-lucide="briefcase"></i></div><div><h2 class="font-bold">إدارة الإنتاج</h2><p class="text-xs text-gray-500">${c('management')} موظف</p></div></div><i data-lucide="chevron-left" class="w-5 h-5 text-gray-300"></i>
                             </div>
                             <div onclick="App.UI.toggleAccordion('accRolling')" class="p-4 flex justify-between items-center active:bg-gray-50 cursor-pointer">
-                                <div class="flex items-center gap-4"><div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><i data-lucide="layers"></i></div><div><h2 class="font-bold">خطوط الدرفلة</h2><p class="text-xs text-gray-500">${c('rolling')} موظف</p></div></div><i id="iconRolling" data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+                                <div class="flex items-center gap-4 flex-1"><div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><i data-lucide="layers"></i></div><div><h2 class="font-bold">خطوط الدرفلة</h2><p class="text-xs text-gray-500">${c('rolling')} موظف</p></div></div><i id="iconRolling" data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
                             </div>
                             <div id="accRolling" class="hidden bg-gray-50/50 p-3 space-y-2">
                                 <div onclick="App.Core.navigate('line1')" class="bg-white p-4 rounded-xl border border-gray-100 flex justify-between items-center cursor-pointer"><span class="font-bold text-sm">خط درفلة 1</span><span class="text-xs bg-gray-100 px-3 py-1 rounded-full font-bold text-gray-600">${c('rolling', '1')}</span></div>
                                 <div onclick="App.Core.navigate('line2')" class="bg-white p-4 rounded-xl border border-gray-100 flex justify-between items-center cursor-pointer"><span class="font-bold text-sm">خط درفلة 2</span><span class="text-xs bg-gray-100 px-3 py-1 rounded-full font-bold text-gray-600">${c('rolling', '2')}</span></div>
                             </div>
                             <div onclick="App.Core.navigate('prep')" class="p-4 flex justify-between items-center active:bg-gray-50 cursor-pointer">
-                                <div class="flex items-center gap-4"><div class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center"><i data-lucide="wrench"></i></div><div><h2 class="font-bold">ورشة التجهيزات</h2><p class="text-xs text-gray-500">${c('prep')} موظف</p></div></div><i data-lucide="chevron-left" class="w-4 h-4 text-gray-400"></i>
+                                <div class="flex items-center gap-4 flex-1"><div class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center"><i data-lucide="wrench"></i></div><div><h2 class="font-bold">ورشة التجهيزات</h2><p class="text-xs text-gray-500">${c('prep')} موظف</p></div></div><i data-lucide="chevron-left" class="w-5 h-5 text-gray-300"></i>
                             </div>
                         </div>`;
                 },
@@ -210,7 +204,7 @@
                     const html = ['A','B','C','D'].map(s => {
                         const count = App.State.employees.filter(e => e.shift === s && (view==='prep'?e.department==='prep':e.line===view.replace('line',''))).length;
                         const activeClass = (s === liveGroup) ? 'active-shift-ring' : '';
-                        return `<div onclick="App.Core.navigateShift('${s}')" class="p-5 flex justify-between items-center active:bg-gray-50 border-b border-gray-50 cursor-pointer"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center font-bold text-gray-700 ${activeClass}">${s}</div><span class="font-bold">وردية ${s}</span></div><span class="text-xs bg-gray-100 px-3 py-1 rounded-full font-bold text-gray-400">${count}</span></div>`;
+                        return `<div onclick="App.Core.navigateShift('${s}')" class="p-5 flex justify-between items-center active:bg-gray-50 border-b border-gray-50 cursor-pointer"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center font-bold text-gray-700 ${activeClass}">${s}</div><span class="font-bold">وردية ${s}</span></div><div class="flex items-center gap-2"><span class="text-xs bg-gray-100 px-3 py-1 rounded-full font-bold text-gray-400">${count}</span><i data-lucide="chevron-left" class="w-5 h-5 text-gray-300"></i></div></div>`;
                     }).join('');
                     return `<h3 class="text-xs font-bold text-gray-500 uppercase mb-3 mr-1">اختر الوردية</h3><div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">${html}</div>`;
                 },
@@ -220,24 +214,21 @@
                     
                     const sortIcon = App.isAdmin ? `<button onclick="App.UI.toggleReorderMode()" class="p-2 ${App.isReorderMode?'text-blue-600 bg-blue-50':'text-gray-400'} rounded-lg"><i data-lucide="arrow-up-down" class="w-4 h-4"></i></button>` : '';
 
-                    let header = `<div class="flex justify-between items-center mb-3 mr-1">
-                        <h3 class="text-xs font-bold text-gray-500 uppercase">قائمة الموظفين</h3>
-                        ${sortIcon}
-                    </div>`;
+                    let header = `<div class="flex justify-between items-center mb-3 mr-1"><h3 class="text-xs font-bold text-gray-500 uppercase">قائمة الموظفين</h3>${sortIcon}</div>`;
 
                     if(!filtered.length) return header + `<div class="py-20 text-center text-gray-400 font-bold">لا يوجد موظفين مسجلين</div>`;
                     
-                    return header + `<div class="space-y-2">` + filtered.map((e, idx) => `
-                        <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm active:scale-95 transition-transform list-item">
-                            <div class="flex items-center gap-4 flex-1" onclick="if(!App.isReorderMode) App.UI.openDetails('${e.uid}')">
+                    return header + `<div class="space-y-2">` + filtered.map((e) => `
+                        <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm active:scale-95 transition-transform list-item" onclick="if(!App.isReorderMode) App.UI.openDetails('${e.uid}')">
+                            <div class="flex items-center gap-4 flex-1">
                                 <div class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 font-bold">${e.shift==='office'?'إدارة':e.shift}</div>
                                 <div><h3 class="font-bold text-sm text-gray-900">${e.name}</h3><p class="text-xs text-gray-500 font-medium">${e.jobTitle} ${e.code?'| '+e.code:''}</p></div>
                             </div>
                             ${App.isReorderMode ? `
                             <div class="flex flex-col gap-1">
-                                <button onclick="App.Core.moveEmployee('${e.uid}', -1)" class="p-1 bg-gray-50 rounded border border-gray-100"><i data-lucide="chevron-up" class="w-4 h-4"></i></button>
-                                <button onclick="App.Core.moveEmployee('${e.uid}', 1)" class="p-1 bg-gray-50 rounded border border-gray-100"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
-                            </div>` : `<i data-lucide="chevron-left" class="w-5 h-5 text-gray-200"></i>`}
+                                <button onclick="event.stopPropagation(); App.Core.moveEmployee('${e.uid}', -1)" class="p-1 bg-gray-50 rounded border border-gray-200"><i data-lucide="chevron-up" class="w-4 h-4"></i></button>
+                                <button onclick="event.stopPropagation(); App.Core.moveEmployee('${e.uid}', 1)" class="p-1 bg-gray-50 rounded border border-gray-200"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
+                            </div>` : `<i data-lucide="chevron-left" class="w-5 h-5 text-gray-300"></i>`}
                         </div>`).join('') + `</div>`;
                 },
 
@@ -246,21 +237,22 @@
                     if(!filtered.length) return `<div class="py-20 text-center text-gray-400">لا توجد نتائج</div>`;
                     return filtered.map(e => `
                         <div onclick="App.Core.clearSearchAndOpen('${e.uid}')" class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm active:scale-95 transition-transform mb-2">
-                            <div class="flex items-center gap-4"><div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 font-bold">${e.shift==='office'?'AD':e.shift}</div><div><h3 class="font-bold text-sm">${e.name}</h3><p class="text-[10px] text-gray-400 font-bold">${App.Config.deptMap[e.department]}</p></div></div><i data-lucide="chevron-left" class="w-4 h-4 text-gray-200"></i>
+                            <div class="flex items-center gap-4 flex-1">
+                                <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 font-bold">${e.shift==='office'?'AD':e.shift}</div>
+                                <div><h3 class="font-bold text-sm text-gray-900">${e.name}</h3><p class="text-[10px] text-gray-400 font-bold">${App.Config.deptMap[e.department]}</p></div>
+                            </div><i data-lucide="chevron-left" class="w-5 h-5 text-gray-300"></i>
                         </div>`).join('');
                 },
+
+                toggleReorderMode() { App.isReorderMode = !App.isReorderMode; App.UI.updateAll(false); },
 
                 toggleAccordion(id) {
                     const el = document.getElementById(id); el.classList.toggle('hidden');
                     document.getElementById('iconRolling').style.transform = el.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
                 },
 
-                toggleReorderMode() {
-                    App.isReorderMode = !App.isReorderMode;
-                    App.UI.updateAll(false);
-                },
-
                 openFormModal(uid = null) {
+                    if(!App.isAdmin) return;
                     App.State.isModalOpen = true; document.getElementById('formEmployee').reset();
                     const { view, shift, employees } = App.State;
                     if(uid) {
@@ -289,26 +281,19 @@
                 },
 
                 openDetails(uid) {
-                    App.State.isModalOpen = true; 
-                    const e = App.State.employees.find(x => x.uid == uid);
-                    const waLink = `https://wa.me/2${e.phone.replace(/\s+/g, '')}`;
+                    App.State.isModalOpen = true; const e = App.State.employees.find(x => x.uid == uid);
+                    const cleanPhone = e.phone.replace(/\s+/g, '');
+                    const waLink = `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone : '0'+cleanPhone}`;
                     const phones = e.department === 'management' ? `
-                        <div class="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-2xl">
-                            <span class="text-gray-400 font-bold text-xs">الموبايل</span>
-                            <div class="flex items-center gap-3"><span class="font-bold text-sm" dir="ltr">${e.phone}</span><a href="${waLink}" target="_blank" class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center"><i data-lucide="message-circle" class="w-4 h-4"></i></a></div>
-                        </div>
-                        <div class="flex justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100"><span class="text-gray-400 font-bold text-xs">الهاتف الأرضي</span><span class="font-bold text-sm" dir="ltr">${e.landline || '-'}</span></div>
-                    ` : `<div class="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-2xl">
-                            <span class="text-gray-400 font-bold text-xs">الهاتف</span>
-                            <div class="flex items-center gap-3"><span class="font-bold text-sm" dir="ltr">${e.phone}</span><a href="${waLink}" target="_blank" class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center"><i data-lucide="message-circle" class="w-4 h-4"></i></a></div>
-                        </div>`;
+                        <div class="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-2xl"><span class="text-gray-400 font-bold text-xs">الموبايل</span><div class="flex items-center gap-3"><span class="font-bold text-sm" dir="ltr">${e.phone}</span><a href="${waLink}" target="_blank" class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center"><i data-lucide="message-circle" class="w-4 h-4"></i></a></div></div>
+                        <div class="flex justify-between p-4 bg-gray-50 border border-gray-100 rounded-2xl"><span class="text-gray-400 font-bold text-xs">الهاتف الأرضي</span><span class="font-bold text-sm" dir="ltr">${e.landline || '-'}</span></div>
+                    ` : `<div class="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-2xl"><span class="text-gray-400 font-bold text-xs">الهاتف</span><div class="flex items-center gap-3"><span class="font-bold text-sm" dir="ltr">${e.phone}</span><a href="${waLink}" target="_blank" class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center"><i data-lucide="message-circle" class="w-4 h-4"></i></a></div></div>`;
 
                     const adminButtons = App.isAdmin ? `<div class="flex gap-4 mt-6"><button onclick="App.Core.deleteEmployee('${e.uid}')" class="flex-1 bg-red-50 text-red-600 py-4 rounded-xl font-bold">حذف</button><button onclick="App.UI.closeAllModals(); setTimeout(()=>App.UI.openFormModal('${e.uid}'), 300)" class="flex-[2] bg-gray-900 text-white py-4 rounded-xl font-bold shadow-lg">تعديل</button></div>` : `<button onclick="window.history.back()" class="w-full bg-gray-100 text-gray-500 py-4 rounded-xl font-bold mt-6">إغلاق</button>`;
 
                     document.getElementById('uiDetailsContent').innerHTML = `
                         <div class="flex flex-col items-center mb-6"><div class="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center text-blue-600 font-black text-3xl mb-3">${e.shift==='office'?'AD':e.shift}</div><h3 class="text-xl font-bold">${e.name}</h3><p class="text-gray-500 font-bold">${e.jobTitle}</p></div>
-                        <div class="space-y-3 mb-2">${e.code ? `<div class="flex justify-between p-4 bg-gray-50 border border-gray-100 rounded-2xl"><span class="text-gray-400 font-bold text-xs">الكود</span><span class="font-bold text-sm">${e.code}</span></div>` : ''}${phones}</div>
-                        ${adminButtons}`;
+                        <div class="space-y-3 mb-2">${e.code ? `<div class="flex justify-between p-4 bg-gray-50 border border-gray-100 rounded-2xl"><span class="text-gray-400 font-bold text-xs">الكود</span><span class="font-bold text-sm">${e.code}</span></div>` : ''}${phones}</div>${adminButtons}`;
                     
                     document.getElementById('modalOverlay').classList.add('is-open');
                     document.getElementById('sheetDetails').classList.add('is-open');
@@ -324,26 +309,19 @@
             },
 
             Core: {
-                navigate(v) { 
-                    App.State.view = v; 
-                    App.State.shift = (v === 'management') ? 'office' : null; 
-                    App.UI.updateAll(); 
-                },
+                navigate(v) { App.State.view = v; App.State.shift = (v === 'management') ? 'office' : null; App.UI.updateAll(); },
                 navigateShift(s) { App.State.shift = s; App.UI.updateAll(); },
                 
                 clearSearchAndOpen(uid) {
-                    App.State.query = '';
-                    document.getElementById('searchInput').value = '';
-                    App.State.view = 'home';
-                    App.State.shift = null;
+                    App.State.query = ''; document.getElementById('searchInput').value = '';
+                    App.State.view = 'home'; App.State.shift = null;
                     App.UI.updateAll(false);
                     setTimeout(() => App.UI.openDetails(uid), 100);
                 },
 
                 handleDeptChange() {
                     const d = document.getElementById('inpDept').value;
-                    const isM = (d === 'management');
-                    const isP = (d === 'prep');
+                    const isM = (d === 'management'), isP = (d === 'prep');
                     document.getElementById('codeGroup').classList.toggle('hidden', isM);
                     document.getElementById('landlineGroup').classList.toggle('hidden', !isM);
                     document.getElementById('locFields').classList.toggle('hidden', isM);
@@ -351,21 +329,17 @@
                 },
 
                 saveEmployee(ev) {
-                    ev.preventDefault();
-                    if(!window.cloudDB) return alert('خطأ في الاتصال');
+                    ev.preventDefault(); if(!window.cloudDB) return alert('خطأ سحابي');
                     const uid = document.getElementById('inpId').value || "ID-"+Date.now();
                     const dept = document.getElementById('inpDept').value;
                     const lastOrder = App.State.employees.length ? Math.max(...App.State.employees.map(e => e.sortOrder || 0)) : 0;
-
                     const emp = {
                         uid, name: document.getElementById('inpName').value.trim(),
                         code: (dept==='management') ? '' : (document.getElementById('inpCode').value || ''),
-                        jobTitle: document.getElementById('inpJob').value.trim(),
-                        department: dept,
+                        jobTitle: document.getElementById('inpJob').value.trim(), department: dept,
                         line: (dept==='rolling')?document.getElementById('inpLine').value:'none',
                         shift: (dept==='management')?'office':document.getElementById('inpShift').value,
-                        phone: document.getElementById('inpPhone').value.trim(),
-                        landline: document.getElementById('inpLandline').value.trim(),
+                        phone: document.getElementById('inpPhone').value.trim(), landline: document.getElementById('inpLandline').value.trim(),
                         sortOrder: document.getElementById('inpId').value ? (App.State.employees.find(x => x.uid === uid).sortOrder || 0) : lastOrder + 1
                     };
                     window.cloudDB.set(window.cloudDB.ref(window.cloudDB.db, 'employees/' + uid), emp);
@@ -373,62 +347,45 @@
                 },
 
                 moveEmployee(uid, direction) {
-                    const viewData = App.State.employees.filter(e => e.shift === App.State.shift && (App.State.view==='management'?e.department==='management':App.State.view==='prep'?e.department==='prep':e.line===App.State.view.replace('line','')));
-                    const index = viewData.findIndex(e => e.uid === uid);
+                    const currentViewEmps = App.State.employees.filter(e => e.shift === App.State.shift && (App.State.view==='management'?e.department==='management':App.State.view==='prep'?e.department==='prep':e.line===App.State.view.replace('line','')));
+                    const index = currentViewEmps.findIndex(e => e.uid === uid);
                     const newIndex = index + direction;
-                    if (newIndex < 0 || newIndex >= viewData.length) return;
+                    if (newIndex < 0 || newIndex >= currentViewEmps.length) return;
 
-                    const currentEmp = viewData[index];
-                    const swapEmp = viewData[newIndex];
-
+                    const cur = currentViewEmps[index], swap = currentViewEmps[newIndex];
                     const updates = {};
-                    const oldOrder = currentEmp.sortOrder || 0;
-                    const newOrder = swapEmp.sortOrder || 0;
+                    const curOrder = cur.sortOrder || 0, swapOrder = swap.sortOrder || 0;
+                    
+                    // إذا تساوت القيم (بيانات قديمة)، نقوم بتوليد قيم جديدة
+                    const finalCurOrder = (curOrder === swapOrder) ? curOrder : swapOrder;
+                    const finalSwapOrder = (curOrder === swapOrder) ? curOrder + 1 : curOrder;
 
-                    updates[`employees/${currentEmp.uid}/sortOrder`] = newOrder;
-                    updates[`employees/${swapEmp.uid}/sortOrder`] = oldOrder;
-
+                    updates[`employees/${cur.uid}/sortOrder`] = finalCurOrder;
+                    updates[`employees/${swap.uid}/sortOrder`] = finalSwapOrder;
                     window.cloudDB.update(window.cloudDB.ref(window.cloudDB.db), updates);
                 },
 
-                deleteEmployee(uid) {
-                    if(confirm('حذف نهائي؟')) {
-                        window.cloudDB.remove(window.cloudDB.ref(window.cloudDB.db, 'employees/' + uid));
-                        window.history.back();
-                    }
-                },
-
-                wipeAllData() {
-                    if (confirm("⚠️ تحذير: سيتم مسح كافة الموظفين نهائياً. هل أنت متأكد؟")) {
-                        window.cloudDB.remove(window.cloudDB.ref(window.cloudDB.db, 'employees'));
-                    }
-                },
-
+                deleteEmployee(uid) { if(confirm('حذف نهائي؟')) { window.cloudDB.remove(window.cloudDB.ref(window.cloudDB.db, 'employees/' + uid)); window.history.back(); } },
+                wipeAllData() { if (confirm("⚠️ تحذير: سيتم مسح كافة البيانات نهائياً. هل أنت متأكد؟")) window.cloudDB.remove(window.cloudDB.ref(window.cloudDB.db, 'employees')); },
                 clearSearch() { App.State.query = ''; document.getElementById('searchInput').value = ''; App.UI.updateAll(false); }
             },
 
             init() {
                 window.addEventListener('popstate', (e) => {
                     if (e.state) {
-                        App.State.view = e.state.view;
-                        App.State.shift = e.state.shift;
-                        App.State.query = e.state.query;
-                        App.State.isModalOpen = e.state.modal;
+                        App.State.view = e.state.view; App.State.shift = e.state.shift;
+                        App.State.query = e.state.query; App.State.isModalOpen = e.state.modal;
                     } else {
-                        App.State.view = 'home';
-                        App.State.shift = null;
-                        App.State.query = '';
-                        App.State.isModalOpen = false;
+                        App.State.view = 'home'; App.State.shift = null; App.State.query = ''; App.State.isModalOpen = false;
                     }
-                    App.UI.closeAllModals();
+                    if (!App.State.isModalOpen) App.UI.closeAllModals();
                     App.UI.updateAll(false);
                 });
-
                 document.getElementById('searchInput').addEventListener('input', e => { 
                     App.State.query = e.target.value; 
-                    App.UI.updateAll(true); 
+                    if(App.State.query.length > 0) App.UI.updateAll(true);
+                    else App.UI.updateAll(false);
                 });
-
                 App.UI.updateAll(false);
             }
         };
