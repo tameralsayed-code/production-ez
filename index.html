@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>قسم الإنتاج | V31 Clean UI</title>
+    <title>قسم الإنتاج | النسخة النهائية V30</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- محرك السحابة - Firebase -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
       import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
       import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+      // إعدادات مشروعك الخاصة
       const firebaseConfig = {
         apiKey: "AIzaSyBv9f9VzWWLMn4P_z-U-TKwkJBNaNdbAYI",
         authDomain: "production-ez.firebaseapp.com",
@@ -29,10 +31,12 @@
       const db = getDatabase(app);
       const auth = getAuth(app);
 
+      // تسجيل الدخول المجهول لتفعيل الأمان السحابي
       signInAnonymously(auth).then(() => {
           window.cloudDB = { db, ref, set, onValue, remove, update };
           App.UI.syncWithCloud();
-      }).catch(err => console.error("Cloud Error"));
+          console.log("Cloud Database Connected");
+      }).catch(err => alert("فشل الاتصال بالسحابة: " + err.message));
     </script>
 
     <style>
@@ -43,7 +47,7 @@
         .form-input { width: 100%; display: block; background: #FFFFFF; border: 1px solid #D1D5DB; padding: 12px 16px; border-radius: 12px; font-size: 14px; }
         .form-input:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 12px center; background-size: 16px; padding-left: 40px; }
-        .sheet-container { transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: white; border-top-left-radius: 28px; border-top-right-radius: 28px; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); max-height: 92vh; display: flex; flex-direction: column; }
+        .sheet-container { transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: white; border-top-left-radius: 28px; border-top-right-radius: 28px; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); max-height: 90vh; display: flex; flex-direction: column; }
         .sheet-container.is-open { transform: translateY(0); }
         .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 40; backdrop-filter: blur(2px); }
         .sheet-overlay.is-open { opacity: 1; pointer-events: auto; }
@@ -60,7 +64,12 @@
     <!-- HEADER -->
     <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div class="h-16 px-5 flex items-center justify-between">
-            <h1 id="uiMainTitle" class="text-lg font-bold text-gray-900">قسم الإنتاج</h1>
+            <div class="flex items-center gap-3">
+                <button id="btnBack" onclick="window.history.back()" class="hidden w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-all">
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+                <h1 id="uiMainTitle" class="text-lg font-bold text-gray-900">قسم الإنتاج</h1>
+            </div>
             <div class="flex items-center gap-2">
                 <button id="btnWipe" onclick="App.Core.wipeAllData()" class="hidden w-10 h-10 rounded-xl bg-red-50 text-red-600 items-center justify-center border border-red-100"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
                 <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100"><i data-lucide="factory" class="w-5 h-5 text-gray-700"></i></div>
@@ -69,16 +78,20 @@
         <div class="px-5 pb-3">
             <div class="relative">
                 <i data-lucide="search" class="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-                <input type="text" id="searchInput" placeholder="بحث بالاسم أو الكود..." class="w-full bg-gray-100 border-none pr-10 pl-10 py-2.5 rounded-xl text-sm font-medium outline-none">
+                <input type="text" id="searchInput" placeholder="بحث بالاسم أو الكود..." class="w-full bg-gray-100 border-none pr-10 pl-10 py-2.5 rounded-xl text-sm outline-none">
             </div>
         </div>
     </header>
 
+    <!-- MAIN APP VIEW -->
     <main id="mainContent" class="px-5 py-4 pb-32">
         <p class="text-center text-gray-400 py-20">جاري مزامنة البيانات...</p>
     </main>
 
-    <button id="fabAdd" onclick="App.UI.openFormModal()" class="hidden fixed bottom-8 left-6 z-20 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"><i data-lucide="plus" class="w-7 h-7"></i></button>
+    <!-- FAB -->
+    <button id="fabAdd" onclick="App.UI.openFormModal()" class="hidden fixed bottom-8 left-6 z-20 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform">
+        <i data-lucide="plus" class="w-7 h-7"></i>
+    </button>
 
     <div id="modalOverlay" class="sheet-overlay" onclick="window.history.back()"></div>
 
@@ -88,7 +101,7 @@
             <h2 id="uiFormTitle" class="text-lg font-bold text-gray-900">بيانات الموظف</h2>
             <button onclick="window.history.back()" class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-500"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
-        <div class="p-6 overflow-y-auto no-scrollbar flex-1 pb-20">
+        <div class="p-6 overflow-y-auto no-scrollbar pb-20 flex-1">
             <form id="formEmployee" onsubmit="App.Core.saveEmployee(event)">
                 <input type="hidden" id="inpId"><input type="hidden" id="inpDept">
                 <div class="form-group"><label class="form-label">الاسم بالكامل</label><input type="text" id="inpName" required class="form-input"></div>
@@ -123,7 +136,8 @@
                     const now = new Date(); const h = now.getHours();
                     let d = new Date(now); let type = (h>=8 && h<16)?'morning':(h>=16 && h<24)?'noon':'evening';
                     if(type==='evening' && h<8) d.setDate(d.getDate()-1);
-                    const diff = Math.round((d - new Date(2025, 0, 1)) / 86400000);
+                    const start = new Date(2025, 0, 1);
+                    const diff = Math.round((d - start) / 86400000);
                     const init = { 'A': { t: 'evening', d: 3 }, 'B': { t: 'morning-rest', d: 1 }, 'C': { t: 'noon', d: 5 }, 'D': { t: 'morning', d: 1 } };
                     const nums = ['الأول', 'الثاني', 'الثالث', 'الرابع', 'الخامس'];
                     for(let g in init) {
@@ -146,21 +160,18 @@
             UI: {
                 syncWithCloud() {
                     if (!window.cloudDB) return;
-                    onValue(window.cloudDB.ref(window.cloudDB.db, 'employees'), (snap) => {
-                        const data = snap.val();
+                    window.cloudDB.onValue(window.cloudDB.ref(window.cloudDB.db, 'employees'), (snapshot) => {
+                        const data = snapshot.val();
                         const list = data ? Object.values(data).filter(e => e && e.name) : [];
                         App.State.employees = list.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-                        App.UI.render('none');
+                        App.UI.updateAll(false);
                     });
                 },
 
-                render(historyMode = 'none') {
+                updateAll(pushToHistory = true) {
                     const { view, shift, query, employees, isModalOpen } = App.State;
                     const live = App.ShiftEngine.getLiveNow();
                     
-                    if (historyMode === 'push') history.pushState({ view, shift, query, modal: isModalOpen }, "");
-                    else if (historyMode === 'replace') history.replaceState({ view, shift, query, modal: isModalOpen }, "");
-
                     let html = '';
                     if (query) html = this.renderSearch(query);
                     else if (shift) html = this.renderEmployeeList(view, shift);
@@ -168,10 +179,13 @@
                     else html = this.renderHome(employees, live);
 
                     document.getElementById('mainContent').innerHTML = html;
+                    document.getElementById('btnBack').classList.toggle('hidden', view === 'home' && !query);
                     document.getElementById('fabAdd').classList.toggle('hidden', !App.isAdmin || !shift || !!query);
                     document.getElementById('btnWipe').classList.toggle('flex', App.isAdmin && view === 'home');
                     document.getElementById('uiMainTitle').innerText = query ? 'البحث' : (shift === 'office' ? 'طاقم الإدارة' : shift ? `وردية ${shift}` : 'قسم الإنتاج');
+                    
                     lucide.createIcons();
+                    if (pushToHistory) history.pushState({ view, shift, query, modal: isModalOpen }, "");
                 },
 
                 renderHome(employees, live) {
@@ -183,7 +197,7 @@
                         </div>
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50">
                             <div onclick="App.Core.navigate('management')" class="p-4 flex justify-between items-center active:bg-gray-50 cursor-pointer">
-                                <div class="flex items-center gap-4 flex-1"><div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center"><i data-lucide="briefcase"></i></div><div><h2 class="font-bold">إدارة الإنتاج</h2><p class="text-xs text-gray-500">${c('management')} موظف</p></div></div><i data-lucide="chevron-left" class="w-5 h-5 text-gray-300"></i>
+                                <div class="flex items-center gap-4 flex-1"><div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center"><i data-lucide="briefcase"></i></div><div><h2 class="font-bold">إدارة الإنتاج</h2><p class="text-xs text-gray-500">${c('management')} موظف</p></div></div><i data-lucide="chevron-left" class="w-4 h-4 text-gray-400"></i>
                             </div>
                             <div onclick="App.UI.toggleAccordion('accRolling')" class="p-4 flex justify-between items-center active:bg-gray-50 cursor-pointer">
                                 <div class="flex items-center gap-4 flex-1"><div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><i data-lucide="layers"></i></div><div><h2 class="font-bold">خطوط الدرفلة</h2><p class="text-xs text-gray-500">${c('rolling')} موظف</p></div></div><i id="iconRolling" data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
@@ -193,7 +207,7 @@
                                 <div onclick="App.Core.navigate('line2')" class="bg-white p-4 rounded-xl border border-gray-100 flex justify-between items-center cursor-pointer"><span class="font-bold text-sm">خط درفلة 2</span><span class="text-xs bg-gray-100 px-3 py-1 rounded-full font-bold text-gray-600">${c('rolling', '2')}</span></div>
                             </div>
                             <div onclick="App.Core.navigate('prep')" class="p-4 flex justify-between items-center active:bg-gray-50 cursor-pointer">
-                                <div class="flex items-center gap-4 flex-1"><div class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center"><i data-lucide="wrench"></i></div><div><h2 class="font-bold">ورشة التجهيزات</h2><p class="text-xs text-gray-500">${c('prep')} موظف</p></div></div><i data-lucide="chevron-left" class="w-5 h-5 text-gray-300"></i>
+                                <div class="flex items-center gap-4 flex-1"><div class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center"><i data-lucide="wrench"></i></div><div><h2 class="font-bold">ورشة التجهيزات</h2><p class="text-xs text-gray-500">${c('prep')} موظف</p></div></div><i data-lucide="chevron-left" class="w-4 h-4 text-gray-400"></i>
                             </div>
                         </div>`;
                 },
@@ -209,109 +223,202 @@
 
                 renderEmployeeList(view, shift) {
                     const filtered = App.State.employees.filter(e => e.shift === shift && (view==='management'?e.department==='management':view==='prep'?e.department==='prep':e.line===view.replace('line','')));
-                    const sortBtn = App.isAdmin ? `<button onclick="App.UI.toggleReorderMode()" class="p-2 ${App.isReorderMode?'text-blue-600 bg-blue-50':'text-gray-400'} rounded-lg"><i data-lucide="arrow-up-down" class="w-4 h-4"></i></button>` : '';
-                    let header = `<div class="flex justify-between items-center mb-3 mr-1"><h3 class="text-xs font-bold text-gray-500 uppercase">قائمة الموظفين</h3>${sortBtn}</div>`;
+                    const sortIcon = App.isAdmin ? `<button onclick="App.UI.toggleReorderMode()" class="p-2 ${App.isReorderMode?'text-blue-600 bg-blue-50':'text-gray-400'} rounded-lg"><i data-lucide="arrow-up-down" class="w-4 h-4"></i></button>` : '';
+                    let header = `<div class="flex justify-between items-center mb-3 mr-1"><h3 class="text-xs font-bold text-gray-500 uppercase">قائمة الموظفين</h3>${sortIcon}</div>`;
                     if(!filtered.length) return header + `<div class="py-20 text-center text-gray-400 font-bold">لا يوجد موظفين مسجلين</div>`;
                     
-                    return header + `<div class="space-y-2">` + filtered.map((e) => `
-                        <div class="bg-white p-4 rounded-2xl border border-gray-100 flex items-center shadow-sm active:scale-[0.98] transition-all list-item" onclick="if(!App.isReorderMode) App.UI.openDetails('${e.uid}')">
+                    return header + `<div class="space-y-2">` + filtered.map((e) => {
+                        const avatarContent = (e.department === 'management') ? `<i data-lucide="user-cog" class="w-6 h-6"></i>` : e.shift;
+                        return `
+                        <div class="bg-white p-4 rounded-2xl border border-gray-100 flex items-center justify-between shadow-sm active:scale-[0.98] transition-all list-item" onclick="if(!App.isReorderMode) App.UI.openDetails('${e.uid}')">
                             <div class="flex items-center gap-4 flex-1 min-w-0">
-                                <div class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 font-bold shrink-0 ml-4">${(e.department==='management')?'<i data-lucide="user-cog" class="w-6 h-6"></i>':e.shift}</div>
-                                <div class="flex-1 min-w-0 flex flex-col justify-center">
+                                <div class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 font-bold shrink-0">${avatarContent}</div>
+                                <div class="flex-1 min-w-0">
                                     <h3 class="font-bold text-sm text-gray-900 leading-tight truncate">${e.name}</h3>
                                     <p class="text-xs text-gray-500 font-medium mt-0.5 truncate">${e.jobTitle} ${e.code?'| '+e.code:''}</p>
                                 </div>
                             </div>
                             <div class="flex items-center shrink-0">
-                                ${App.isReorderMode ? `<div class="flex flex-col gap-1 ml-2"><button onclick="event.stopPropagation(); App.Core.moveEmployee('${e.uid}', -1)" class="p-1.5 bg-gray-50 rounded border border-gray-200"><i data-lucide="chevron-up" class="w-4 h-4 text-gray-600"></i></button><button onclick="event.stopPropagation(); App.Core.moveEmployee('${e.uid}', 1)" class="p-1.5 bg-gray-50 rounded border border-gray-200"><i data-lucide="chevron-down" class="w-4 h-4 text-gray-600"></i></button></div>` : ``}
+                                ${App.isReorderMode ? `
+                                <div class="flex flex-col gap-1">
+                                    <button onclick="event.stopPropagation(); App.Core.moveEmployee('${e.uid}', -1)" class="p-1.5 bg-gray-50 rounded border border-gray-200"><i data-lucide="chevron-up" class="w-4 h-4 text-gray-600"></i></button>
+                                    <button onclick="event.stopPropagation(); App.Core.moveEmployee('${e.uid}', 1)" class="p-1.5 bg-gray-50 rounded border border-gray-200"><i data-lucide="chevron-down" class="w-4 h-4 text-gray-600"></i></button>
+                                </div>` : ``}
                             </div>
-                        </div>`).join('') + `</div>`;
+                        </div>`;
+                    }).join('') + `</div>`;
                 },
 
                 renderSearch(q) {
                     const filtered = App.State.employees.filter(e => e.name.toLowerCase().includes(q.toLowerCase()) || (e.code && e.code.toString().includes(q)));
                     if(!filtered.length) return `<div class="py-20 text-center text-gray-400">لا توجد نتائج</div>`;
-                    return filtered.map(e => `
-                        <div onclick="App.Core.clearSearchAndOpen('${e.uid}')" class="bg-white p-4 rounded-2xl border border-gray-100 flex items-center shadow-sm active:scale-[0.98] transition-transform mb-2">
+                    return filtered.map(e => {
+                        const avatarContent = (e.department === 'management') ? `<i data-lucide="user-cog" class="w-6 h-6"></i>` : e.shift;
+                        return `
+                        <div onclick="App.Core.clearSearchAndOpen('${e.uid}')" class="bg-white p-4 rounded-2xl border border-gray-100 flex items-center justify-between shadow-sm active:scale-[0.98] transition-transform mb-2">
                             <div class="flex items-center gap-4 flex-1 min-w-0">
-                                <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 font-bold shrink-0 ml-4">${(e.department==='management')?'<i data-lucide="user-cog" class="w-6 h-6"></i>':e.shift}</div>
-                                <div class="flex-1 min-w-0 text-right flex flex-col justify-center">
-                                    <h3 class="font-bold text-sm text-gray-900 truncate leading-tight">${e.name}</h3>
+                                <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 font-bold shrink-0">${avatarContent}</div>
+                                <div class="flex-1 min-w-0 text-right">
+                                    <h3 class="font-bold text-sm text-gray-900 leading-tight truncate">${e.name}</h3>
                                     <p class="text-[10px] text-gray-400 font-bold mt-0.5 truncate">${App.Config.deptMap[e.department]}</p>
                                 </div>
                             </div>
-                        </div>`).join('');
+                        </div>`;
+                    }).join('');
                 },
 
-                toggleReorderMode() { App.isReorderMode = !App.isReorderMode; App.UI.render('none'); },
-                toggleAccordion(id) { const el = document.getElementById(id); el.classList.toggle('hidden'); const icon = document.getElementById('iconRolling'); if(icon) icon.style.transform = el.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)'; },
+                toggleReorderMode() { App.isReorderMode = !App.isReorderMode; App.UI.updateAll(false); },
+                toggleAccordion(id) {
+                    const el = document.getElementById(id); el.classList.toggle('hidden');
+                    const icon = document.getElementById('iconRolling');
+                    if(icon) icon.style.transform = el.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+                },
 
                 openFormModal(uid = null) {
-                    if(!App.isAdmin) return; App.State.isModalOpen = true; document.getElementById('formEmployee').reset();
+                    if(!App.isAdmin) return;
+                    App.State.isModalOpen = true; document.getElementById('formEmployee').reset();
+                    const { view, shift, employees } = App.State;
                     if(uid) {
-                        const e = App.State.employees.find(x => x.uid == uid);
-                        document.getElementById('inpId').value = e.uid; document.getElementById('inpName').value = e.name;
-                        document.getElementById('inpCode').value = e.code || ''; document.getElementById('inpPhone').value = e.phone;
-                        document.getElementById('inpLandline').value = e.landline || ''; document.getElementById('inpJob').value = e.jobTitle;
-                        document.getElementById('inpDept').value = e.department; document.getElementById('inpLine').value = e.line;
-                        document.getElementById('inpShift').value = e.shift; document.getElementById('uiFormTitle').innerText = "تعديل بيانات";
+                        const e = employees.find(x => x.uid == uid);
+                        document.getElementById('inpId').value = e.uid;
+                        document.getElementById('inpName').value = e.name;
+                        document.getElementById('inpCode').value = e.code || '';
+                        document.getElementById('inpPhone').value = e.phone;
+                        document.getElementById('inpLandline').value = e.landline || '';
+                        document.getElementById('inpJob').value = e.jobTitle;
+                        document.getElementById('inpDept').value = e.department;
+                        document.getElementById('inpLine').value = e.line;
+                        document.getElementById('inpShift').value = e.shift;
+                        document.getElementById('uiFormTitle').innerText = "تعديل بيانات";
                     } else {
                         document.getElementById('inpId').value = '';
-                        document.getElementById('inpDept').value = (App.State.view==='management')?'management':(App.State.view==='prep'?'prep':'rolling');
-                        if(App.State.view.startsWith('line')) document.getElementById('inpLine').value = App.State.view.replace('line','');
-                        document.getElementById('inpShift').value = App.State.shift || 'A';
+                        document.getElementById('inpDept').value = (view==='management')?'management':(view==='prep'?'prep':'rolling');
+                        if(view.startsWith('line')) document.getElementById('inpLine').value = view.replace('line','');
+                        document.getElementById('inpShift').value = shift || 'A';
                         document.getElementById('uiFormTitle').innerText = "إضافة موظف جديد";
                     }
                     App.Core.handleDeptChange();
                     document.getElementById('modalOverlay').classList.add('is-open');
                     document.getElementById('sheetForm').classList.add('is-open');
-                    App.UI.render('push');
+                    App.UI.updateAll(true);
                 },
 
                 openDetails(uid) {
                     App.State.isModalOpen = true; const e = App.State.employees.find(x => x.uid == uid);
-                    const waLink = `https://wa.me/2${e.phone.replace(/\s+/g, '')}`;
-                    const avatar = (e.department === 'management') ? `<i data-lucide="user-cog" class="w-10 h-10"></i>` : e.shift;
-                    const phones = e.department === 'management' ? `<div class="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-2xl"><span class="text-gray-400 font-bold text-xs">الموبايل</span><div class="flex items-center gap-3"><span class="font-bold text-sm" dir="ltr">${e.phone}</span><a href="${waLink}" target="_blank" class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center"><i data-lucide="message-circle" class="w-4 h-4"></i></a></div></div><div class="flex justify-between p-4 bg-gray-50 border border-gray-100 rounded-2xl"><span class="text-gray-400 font-bold text-xs">الهاتف الأرضي</span><span class="font-bold text-sm" dir="ltr">${e.landline || '-'}</span></div>` : `<div class="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-2xl"><span class="text-gray-400 font-bold text-xs">الهاتف</span><div class="flex items-center gap-3"><span class="font-bold text-sm" dir="ltr">${e.phone}</span><a href="${waLink}" target="_blank" class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center"><i data-lucide="message-circle" class="w-4 h-4"></i></a></div></div>`;
-                    const adminBtns = App.isAdmin ? `<div class="flex gap-4 mt-6"><button onclick="App.Core.deleteEmployee('${e.uid}')" class="flex-1 bg-red-50 text-red-600 py-4 rounded-xl font-bold">حذف</button><button onclick="App.UI.closeAllModals(); setTimeout(()=>App.UI.openFormModal('${e.uid}'), 300)" class="flex-[2] bg-gray-900 text-white py-4 rounded-xl font-bold shadow-lg">تعديل</button></div>` : `<button onclick="window.history.back()" class="w-full bg-gray-100 text-gray-500 py-4 rounded-xl font-bold mt-6">إغلاق</button>`;
-                    document.getElementById('uiDetailsContent').innerHTML = `<div class="flex flex-col items-center mb-6"><div class="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center text-blue-600 font-black text-3xl mb-3">${avatar}</div><h3 class="text-xl font-bold text-gray-900">${e.name}</h3><p class="text-gray-500 font-bold">${e.jobTitle}</p></div><div class="space-y-3 mb-2">${e.code ? `<div class="flex justify-between p-4 bg-gray-50 border border-gray-100 rounded-2xl"><span class="text-gray-400 font-bold text-xs">الكود</span><span class="font-bold text-sm">${e.code}</span></div>` : ''}${phones}</div>${adminBtns}`;
+                    const cleanPhone = e.phone.replace(/\s+/g, '');
+                    const waLink = `https://wa.me/2${cleanPhone}`;
+                    const avatarContent = (e.department === 'management') ? `<i data-lucide="user-cog" class="w-10 h-10"></i>` : e.shift;
+                    const phones = e.department === 'management' ? `
+                        <div class="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-2xl"><span class="text-gray-400 font-bold text-xs">الموبايل</span><div class="flex items-center gap-3"><span class="font-bold text-sm" dir="ltr">${e.phone}</span><a href="${waLink}" target="_blank" class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center"><i data-lucide="message-circle" class="w-4 h-4"></i></a></div></div>
+                        <div class="flex justify-between p-4 bg-gray-50 border border-gray-100 rounded-2xl"><span class="text-gray-400 font-bold text-xs">الهاتف الأرضي</span><span class="font-bold text-sm" dir="ltr">${e.landline || '-'}</span></div>
+                    ` : `<div class="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-2xl"><span class="text-gray-400 font-bold text-xs">الهاتف</span><div class="flex items-center gap-3"><span class="font-bold text-sm" dir="ltr">${e.phone}</span><a href="${waLink}" target="_blank" class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center"><i data-lucide="message-circle" class="w-4 h-4"></i></a></div></div>`;
+                    const adminButtons = App.isAdmin ? `<div class="flex gap-4 mt-6"><button onclick="App.Core.deleteEmployee('${e.uid}')" class="flex-1 bg-red-50 text-red-600 py-4 rounded-xl font-bold">حذف</button><button onclick="App.UI.closeAllModals(); setTimeout(()=>App.UI.openFormModal('${e.uid}'), 300)" class="flex-[2] bg-gray-900 text-white py-4 rounded-xl font-bold shadow-lg">تعديل</button></div>` : `<button onclick="window.history.back()" class="w-full bg-gray-100 text-gray-500 py-4 rounded-xl font-bold mt-6">إغلاق</button>`;
+                    document.getElementById('uiDetailsContent').innerHTML = `<div class="flex flex-col items-center mb-6"><div class="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center text-blue-600 font-black text-3xl mb-3">${avatarContent}</div><h3 class="text-xl font-bold">${e.name}</h3><p class="text-gray-500 font-bold">${e.jobTitle}</p></div><div class="space-y-3 mb-2">${e.code ? `<div class="flex justify-between p-4 bg-gray-50 border border-gray-100 rounded-2xl"><span class="text-gray-400 font-bold text-xs">الكود</span><span class="font-bold text-sm">${e.code}</span></div>` : ''}${phones}</div>${adminButtons}`;
                     document.getElementById('modalOverlay').classList.add('is-open');
                     document.getElementById('sheetDetails').classList.add('is-open');
-                    App.UI.render('push');
+                    App.UI.updateAll(true);
                 },
 
-                closeAllModals() { App.State.isModalOpen = false; document.getElementById('modalOverlay').classList.remove('is-open'); document.getElementById('sheetForm').classList.remove('is-open'); document.getElementById('sheetDetails').classList.remove('is-open'); }
+                closeAllModals() {
+                    App.State.isModalOpen = false;
+                    document.getElementById('modalOverlay').classList.remove('is-open');
+                    document.getElementById('sheetForm').classList.remove('is-open');
+                    document.getElementById('sheetDetails').classList.remove('is-open');
+                }
             },
 
             Core: {
-                navigate(v) { App.State.view = v; App.State.shift = (v === 'management') ? 'office' : null; App.UI.render('push'); },
-                navigateShift(s) { App.State.shift = s; App.UI.render('push'); },
-                clearSearchAndOpen(uid) { App.State.query = ''; document.getElementById('searchInput').value = ''; App.State.view = 'home'; App.State.shift = null; App.UI.render('replace'); setTimeout(() => App.UI.openDetails(uid), 100); },
-                handleDeptChange() { const d = document.getElementById('inpDept').value; const isM = (d === 'management'); const isP = (d === 'prep'); document.getElementById('codeGroup').classList.toggle('hidden', isM); document.getElementById('landlineGroup').classList.toggle('hidden', !isM); document.getElementById('locFields').classList.toggle('hidden', isM); document.getElementById('wrapperLine').classList.toggle('hidden', isM || isP); },
-                saveEmployee(ev) { ev.preventDefault(); if(!window.cloudDB) return alert('خطأ سحابي'); const uid = document.getElementById('inpId').value || "ID-"+Date.now(); const dept = document.getElementById('inpDept').value; const lastOrder = App.State.employees.length ? Math.max(...App.State.employees.map(e => e.sortOrder || 0)) : 0; const emp = { uid, name: document.getElementById('inpName').value.trim(), code: (dept==='management') ? '' : (document.getElementById('inpCode').value || ''), jobTitle: document.getElementById('inpJob').value.trim(), department: dept, line: (dept==='rolling')?document.getElementById('inpLine').value:'none', shift: (dept==='management')?'office':document.getElementById('inpShift').value, phone: document.getElementById('inpPhone').value.trim(), landline: document.getElementById('inpLandline').value.trim(), sortOrder: document.getElementById('inpId').value ? (App.State.employees.find(x => x.uid === uid).sortOrder || 0) : lastOrder + 1 }; window.cloudDB.set(window.cloudDB.ref(window.cloudDB.db, 'employees/' + uid), emp); window.history.back(); },
+                navigate(v) { 
+                    App.State.view = v; 
+                    App.State.shift = (v === 'management') ? 'office' : null; 
+                    App.UI.updateAll(true); 
+                },
+                navigateShift(s) { App.State.shift = s; App.UI.updateAll(true); },
+                
+                goBack(byPopState = true) {
+                    if (App.State.isModalOpen) {
+                        App.UI.closeAllModals();
+                    } else if (App.State.query) {
+                        this.clearSearch();
+                    } else if (App.State.shift) {
+                        if (App.State.view === 'management') { App.State.view = 'home'; App.State.shift = null; }
+                        else App.State.shift = null;
+                    } else if (App.State.view !== 'home') {
+                        App.State.view = 'home';
+                    }
+                    App.UI.updateAll(false);
+                },
+
+                clearSearchAndOpen(uid) {
+                    App.State.query = '';
+                    document.getElementById('searchInput').value = '';
+                    App.State.view = 'home';
+                    App.State.shift = null;
+                    App.UI.updateAll(false);
+                    setTimeout(() => App.UI.openDetails(uid), 100);
+                },
+
+                handleDeptChange() {
+                    const d = document.getElementById('inpDept').value;
+                    const isM = (d === 'management');
+                    const isP = (d === 'prep');
+                    document.getElementById('codeGroup').classList.toggle('hidden', isM);
+                    document.getElementById('landlineGroup').classList.toggle('hidden', !isM);
+                    document.getElementById('locFields').classList.toggle('hidden', isM);
+                    document.getElementById('wrapperLine').classList.toggle('hidden', isM || isP);
+                },
+
+                saveEmployee(ev) {
+                    ev.preventDefault();
+                    if(!window.cloudDB) return alert('خطأ في الاتصال');
+                    const uid = document.getElementById('inpId').value || "ID-"+Date.now();
+                    const dept = document.getElementById('inpDept').value;
+                    const lastOrder = App.State.employees.length ? Math.max(...App.State.employees.map(e => e.sortOrder || 0)) : 0;
+                    const emp = {
+                        uid, name: document.getElementById('inpName').value.trim(),
+                        code: (dept==='management') ? '' : (document.getElementById('inpCode').value || ''),
+                        jobTitle: document.getElementById('inpJob').value.trim(),
+                        department: dept,
+                        line: (dept==='rolling')?document.getElementById('inpLine').value:'none',
+                        shift: (dept==='management')?'office':document.getElementById('inpShift').value,
+                        phone: document.getElementById('inpPhone').value.trim(),
+                        landline: document.getElementById('inpLandline').value.trim(),
+                        sortOrder: document.getElementById('inpId').value ? (App.State.employees.find(x => x.uid === uid).sortOrder || 0) : lastOrder + 1
+                    };
+                    window.cloudDB.set(window.cloudDB.ref(window.cloudDB.db, 'employees/' + uid), emp);
+                    window.history.back();
+                },
+
                 moveEmployee(uid, direction) { 
-                    const curEmps = App.State.employees.filter(e => e.shift === App.State.shift && (App.State.view==='management'?e.department==='management':App.State.view==='prep'?e.department==='prep':e.line===App.State.view.replace('line','')));
-                    const idx = curEmps.findIndex(e => e.uid === uid); const targetIdx = idx + direction;
-                    if (targetIdx < 0 || targetIdx >= curEmps.length) return;
-                    const cur = curEmps[idx], target = curEmps[targetIdx];
-                    const updates = {}; updates[`employees/${cur.uid}/sortOrder`] = target.sortOrder || 0; updates[`employees/${target.uid}/sortOrder`] = cur.sortOrder || 0;
+                    const currentViewEmps = App.State.employees.filter(e => e.shift === App.State.shift && (App.State.view==='management'?e.department==='management':App.State.view==='prep'?e.department==='prep':e.line===App.State.view.replace('line','')));
+                    const idx = currentViewEmps.findIndex(e => e.uid === uid);
+                    const targetIdx = idx + direction;
+                    if (targetIdx < 0 || targetIdx >= currentViewEmps.length) return;
+                    const cur = currentViewEmps[idx], target = currentViewEmps[targetIdx];
+                    const updates = {};
+                    const oldOrder = cur.sortOrder || 0; const newOrder = target.sortOrder || 0;
+                    updates[`employees/${cur.uid}/sortOrder`] = newOrder; updates[`employees/${target.uid}/sortOrder`] = oldOrder;
                     window.cloudDB.update(window.cloudDB.ref(window.cloudDB.db), updates);
                 },
+
                 deleteEmployee(uid) { if(confirm('حذف نهائي؟')) { window.cloudDB.remove(window.cloudDB.ref(window.cloudDB.db, 'employees/' + uid)); window.history.back(); } },
                 wipeAllData() { if (confirm("⚠️ تحذير: سيتم مسح كافة البيانات نهائياً. هل أنت متأكد؟")) window.cloudDB.remove(window.cloudDB.ref(window.cloudDB.db, 'employees')); },
-                clearSearch() { App.State.query = ''; document.getElementById('searchInput').value = ''; App.UI.render('none'); }
+                clearSearch() { App.State.query = ''; document.getElementById('searchInput').value = ''; App.UI.updateAll(false); }
             },
 
             init() {
-                history.replaceState({ view: 'home', shift: null, query: '', modal: false }, "");
                 window.addEventListener('popstate', (e) => {
-                    const state = e.state || { view: 'home', shift: null, query: '', modal: false };
-                    App.State.view = state.view; App.State.shift = state.shift; App.State.query = state.query; App.State.isModalOpen = state.modal;
+                    if (e.state) {
+                        App.State.view = e.state.view; App.State.shift = e.state.shift;
+                        App.State.query = e.state.query; App.State.isModalOpen = e.state.modal;
+                    } else {
+                        App.State.view = 'home'; App.State.shift = null; App.State.query = ''; App.State.isModalOpen = false;
+                    }
                     if (!App.State.isModalOpen) App.UI.closeAllModals();
-                    App.UI.render('none');
+                    App.UI.updateAll(false);
                 });
-                document.getElementById('searchInput').addEventListener('input', e => { App.State.query = e.target.value; App.UI.render('none'); });
-                App.UI.render('none');
+                document.getElementById('searchInput').addEventListener('input', e => { App.State.query = e.target.value; App.UI.updateAll(true); });
+                App.UI.updateAll(false);
             }
         };
         App.init();
