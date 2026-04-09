@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>قسم الإنتاج | V18 Fast</title>
+    <title>قسم الإنتاج | المزامنة السحابية</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,11 +31,8 @@
 
       signInAnonymously(auth).then(() => {
           window.cloudDB = { db, ref, set, onValue, remove };
-          App.UI.syncWithCloud(); // مزامنة البيانات عند النجاح
-      }).catch(err => {
-          console.error("Firebase Error:", err);
-          alert("فشل الاتصال السحابي. تحقق من الإنترنت.");
-      });
+          App.UI.syncWithCloud();
+      }).catch(err => console.error("Firebase Error", err));
     </script>
 
     <style>
@@ -44,19 +41,18 @@
         .form-group { width: 100%; display: block; margin-bottom: 16px; }
         .form-label { display: block; font-size: 13px; font-weight: 700; color: #374151; margin-bottom: 6px; text-align: right; }
         .form-input { width: 100%; display: block; background: #FFFFFF; border: 1px solid #D1D5DB; padding: 12px 16px; border-radius: 12px; font-size: 14px; }
-        .form-input:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-        select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 12px center; background-size: 16px; padding-left: 40px; }
-        .sheet-container { transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; }
+        .sheet-container { transform: translateY(100%); transition: transform 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; }
         .sheet-container.is-open { transform: translateY(0); }
         .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 40; backdrop-filter: blur(2px); }
         .sheet-overlay.is-open { opacity: 1; pointer-events: auto; }
-        @keyframes shift-pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); border-color: #10b981; } 70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); border-color: #10b981; } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); border-color: #10b981; } }
+        @keyframes shift-pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
         .active-shift-ring { animation: shift-pulse 2s infinite; border: 2px solid #10b981 !important; background-color: #ecfdf5 !important; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="pb-safe pt-safe">
 
+    <!-- HEADER -->
     <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div class="h-16 px-5 flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -69,19 +65,20 @@
             <div class="relative">
                 <i data-lucide="search" class="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
                 <input type="text" id="searchInput" placeholder="بحث بالاسم أو الكود..." class="w-full bg-gray-100 border-none pr-10 pl-10 py-2.5 rounded-xl text-sm outline-none">
-                <button id="btnClearSearch" onclick="App.Core.clearSearch()" class="hidden absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-gray-400"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
             </div>
         </div>
     </header>
 
     <main id="mainContent" class="px-5 py-4 pb-32">
-        <!-- الواجهة ستحمل هنا فوراً -->
+        <p class="text-center text-gray-400 py-10">جاري تحميل البيانات...</p>
     </main>
 
+    <!-- زر الإضافة (يتحكم فيه وضع Admin) -->
     <button id="fabAdd" onclick="App.UI.openFormModal()" class="hidden fixed bottom-8 left-6 z-20 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"><i data-lucide="plus" class="w-7 h-7"></i></button>
 
     <div id="modalOverlay" class="sheet-overlay" onclick="App.UI.closeAllModals()"></div>
 
+    <!-- FORM SHEET (للأدمن فقط) -->
     <div id="sheetForm" class="sheet-container bg-white rounded-t-[28px] shadow-2xl overflow-hidden">
         <div class="p-6 flex justify-between items-center border-b border-gray-100">
             <h2 id="uiFormTitle" class="text-lg font-bold">بيانات الموظف</h2>
@@ -104,10 +101,14 @@
         </div>
     </div>
 
+    <!-- DETAILS SHEET -->
     <div id="sheetDetails" class="sheet-container bg-white rounded-t-[28px] p-8 shadow-2xl"><div id="uiDetailsContent"></div></div>
 
     <script>
         const App = {
+            // التحقق من وضع الأدمن عبر الرابط
+            isAdmin: new URLSearchParams(window.location.search).get('mode') === 'admin',
+
             Config: {
                 dbKey: 'employees',
                 deptMap: { 'rolling': 'خطوط الدرفلة', 'prep': 'تجهيزات', 'management': 'إدارة الإنتاج' },
@@ -148,7 +149,7 @@
                     onValue(ref(db, 'employees'), (snapshot) => {
                         const data = snapshot.val();
                         App.State.employees = data ? Object.values(data) : [];
-                        App.UI.updateAll(false); // تحديث الأرقام والأسماء فور وصولها
+                        App.UI.updateAll(false);
                     });
                 },
 
@@ -163,7 +164,10 @@
 
                     document.getElementById('mainContent').innerHTML = html;
                     document.getElementById('btnBack').classList.toggle('hidden', view === 'home' && !query);
-                    document.getElementById('fabAdd').classList.toggle('hidden', !shift || !!query);
+                    
+                    // إظهار زر الإضافة فقط إذا كان الشخص أدمن وداخل وردية
+                    document.getElementById('fabAdd').classList.toggle('hidden', !App.isAdmin || !shift || !!query);
+                    
                     document.getElementById('uiMainTitle').innerText = query ? 'البحث' : (shift === 'office' ? 'طاقم الإدارة' : shift ? `وردية ${shift}` : 'قسم الإنتاج');
                     lucide.createIcons();
                     if (pushState) history.pushState({ view, shift, query }, "");
@@ -197,7 +201,8 @@
                     if (view === 'management') { setTimeout(() => App.Core.navigateShift('office'), 10); return ''; }
                     const html = ['A','B','C','D'].map(s => {
                         const count = App.State.employees.filter(e => e.shift === s && (view==='prep'?e.department==='prep':e.line===view.replace('line',''))).length;
-                        return `<div onclick="App.Core.navigateShift('${s}')" class="p-5 flex justify-between items-center active:bg-gray-50 border-b border-gray-50 cursor-pointer"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center font-bold text-gray-700 ${s===liveGroup?'active-shift-ring':''}">${s}</div><span class="font-bold">وردية ${s}</span></div><span class="text-xs bg-gray-100 px-3 py-1 rounded-full font-bold text-gray-400">${count}</span></div>`;
+                        const activeClass = (s === liveGroup) ? 'active-shift-ring' : '';
+                        return `<div onclick="App.Core.navigateShift('${s}')" class="p-5 flex justify-between items-center active:bg-gray-50 border-b border-gray-50 cursor-pointer"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center font-bold text-gray-700 ${activeClass}">${s}</div><span class="font-bold">وردية ${s}</span></div><span class="text-xs bg-gray-100 px-3 py-1 rounded-full font-bold text-gray-400">${count}</span></div>`;
                     }).join('');
                     return `<h3 class="text-xs font-bold text-gray-500 uppercase mb-3 mr-1">اختر الوردية</h3><div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">${html}</div>`;
                 },
@@ -228,23 +233,31 @@
                 },
 
                 openFormModal(uid = null) {
+                    if(!App.isAdmin) return; // حماية إضافية
                     App.State.isModalOpen = true; document.getElementById('formEmployee').reset();
                     const { view, shift, employees } = App.State;
                     const dept = (view==='management')?'management':(view==='prep'?'prep':'rolling');
                     document.getElementById('inpDept').value = dept;
+
                     if(uid) {
                         const e = employees.find(x => x.uid == uid);
-                        document.getElementById('inpId').value = e.uid; document.getElementById('inpName').value = e.name;
-                        document.getElementById('inpCode').value = e.code || ''; document.getElementById('inpPhone').value = e.phone;
-                        document.getElementById('inpLandline').value = e.landline || ''; document.getElementById('inpJob').value = e.jobTitle;
-                        document.getElementById('inpLine').value = e.line; document.getElementById('inpShift').value = e.shift;
+                        document.getElementById('inpId').value = e.uid;
+                        document.getElementById('inpName').value = e.name;
+                        document.getElementById('inpCode').value = e.code || '';
+                        document.getElementById('inpPhone').value = e.phone;
+                        document.getElementById('inpLandline').value = e.landline || '';
+                        document.getElementById('inpJob').value = e.jobTitle;
+                        document.getElementById('inpLine').value = e.line;
+                        document.getElementById('inpShift').value = e.shift;
                     } else {
                         document.getElementById('inpId').value = '';
                         if(view.startsWith('line')) document.getElementById('inpLine').value = view.replace('line','');
                         document.getElementById('inpShift').value = shift || 'A';
                     }
-                    App.Core.handleDeptChange(); document.getElementById('modalOverlay').classList.add('is-open');
-                    document.getElementById('sheetForm').classList.add('is-open'); history.pushState({ modal: 'open' }, "");
+                    App.Core.handleDeptChange();
+                    document.getElementById('modalOverlay').classList.add('is-open');
+                    document.getElementById('sheetForm').classList.add('is-open');
+                    history.pushState({ modal: 'open' }, "");
                 },
 
                 openDetails(uid) {
@@ -253,21 +266,32 @@
                         <div class="flex justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100"><span class="text-gray-400 font-bold text-xs">الموبايل</span><span class="font-bold text-sm" dir="ltr">${e.phone}</span></div>
                         <div class="flex justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100"><span class="text-gray-400 font-bold text-xs">الهاتف الأرضي</span><span class="font-bold text-sm" dir="ltr">${e.landline || '-'}</span></div>
                     ` : `<div class="flex justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100"><span class="text-gray-400 font-bold text-xs">الهاتف</span><span class="font-bold text-sm" dir="ltr">${e.phone}</span></div>`;
-                    document.getElementById('uiDetailsContent').innerHTML = `
-                        <div class="flex flex-col items-center mb-6"><div class="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center text-blue-600 font-black text-3xl mb-3">${e.shift==='office'?'AD':e.shift}</div><h3 class="text-xl font-bold">${e.name}</h3><p class="text-gray-500 font-bold">${e.jobTitle}</p></div>
-                        <div class="space-y-3 mb-8">${e.code ? `<div class="flex justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100"><span class="text-gray-400 font-bold text-xs">الكود</span><span class="font-bold text-sm">${e.code}</span></div>` : ''}${phones}</div>
+
+                    // إظهار أزرار التعديل والحذف فقط للأدمن
+                    const adminButtons = App.isAdmin ? `
                         <div class="flex gap-4">
                             <button onclick="App.Core.deleteEmployee('${e.uid}')" class="flex-1 bg-red-50 text-red-600 py-4 rounded-xl font-bold">حذف</button>
                             <button onclick="App.UI.closeAllModals(); setTimeout(()=>App.UI.openFormModal('${e.uid}'), 300)" class="flex-[2] bg-gray-900 text-white py-4 rounded-xl font-bold shadow-lg">تعديل</button>
-                        </div>`;
+                        </div>` : `<button onclick="App.UI.closeAllModals()" class="w-full bg-gray-100 text-gray-600 py-4 rounded-xl font-bold">إغلاق</button>`;
+
+                    document.getElementById('uiDetailsContent').innerHTML = `
+                        <div class="flex flex-col items-center mb-6"><div class="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center text-blue-600 font-black text-3xl mb-3">${e.shift==='office'?'AD':e.shift}</div><h3 class="text-xl font-bold">${e.name}</h3><p class="text-gray-500 font-bold">${e.jobTitle}</p></div>
+                        <div class="space-y-3 mb-8">
+                            ${e.code ? `<div class="flex justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100"><span class="text-gray-400 font-bold text-xs">الكود</span><span class="font-bold text-sm">${e.code}</span></div>` : ''}
+                            ${phones}
+                        </div>
+                        ${adminButtons}`;
                     document.getElementById('modalOverlay').classList.add('is-open');
                     document.getElementById('sheetDetails').classList.add('is-open');
-                    history.pushState({ modal: 'open' }, ""); lucide.createIcons();
+                    history.pushState({ modal: 'open' }, "");
+                    lucide.createIcons();
                 },
 
                 closeAllModals(byHistory = false) {
-                    App.State.isModalOpen = false; document.getElementById('modalOverlay').classList.remove('is-open');
-                    document.getElementById('sheetForm').classList.remove('is-open'); document.getElementById('sheetDetails').classList.remove('is-open');
+                    App.State.isModalOpen = false;
+                    document.getElementById('modalOverlay').classList.remove('is-open');
+                    document.getElementById('sheetForm').classList.remove('is-open');
+                    document.getElementById('sheetDetails').classList.remove('is-open');
                     if (!byHistory && history.state?.modal) history.back();
                 }
             },
@@ -291,36 +315,34 @@
                     document.getElementById('wrapperLine').classList.toggle('hidden', isM || isP);
                 },
                 saveEmployee(ev) {
-                    ev.preventDefault(); if(!window.cloudDB) return alert('خطأ في الاتصال بالسحابة');
-                    const uid = document.getElementById('inpId').value || Date.now().toString();
+                    ev.preventDefault();
+                    if(!window.cloudDB) return alert('خطأ سحابي');
+                    const uid = document.getElementById('inpId').value || "ID-"+Date.now();
                     const dept = document.getElementById('inpDept').value;
                     const emp = {
                         uid, name: document.getElementById('inpName').value.trim(),
                         code: (dept==='management') ? '' : (document.getElementById('inpCode').value || ''),
-                        jobTitle: document.getElementById('inpJob').value.trim(), department: dept,
+                        jobTitle: document.getElementById('inpJob').value.trim(),
+                        department: dept,
                         line: (dept==='rolling')?document.getElementById('inpLine').value:'none',
                         shift: (dept==='management')?'office':document.getElementById('inpShift').value,
-                        phone: document.getElementById('inpPhone').value.trim(), landline: document.getElementById('inpLandline').value.trim()
+                        phone: document.getElementById('inpPhone').value.trim(),
+                        landline: document.getElementById('inpLandline').value.trim()
                     };
                     window.cloudDB.set(window.cloudDB.ref(window.cloudDB.db, 'employees/' + uid), emp);
                     App.UI.closeAllModals();
                 },
                 deleteEmployee(uid) {
-                    if(confirm('حذف الموظف نهائياً؟')) {
+                    if(confirm('حذف نهائي؟')) {
                         window.cloudDB.remove(window.cloudDB.ref(window.cloudDB.db, 'employees/' + uid));
                         App.UI.closeAllModals();
                     }
-                },
-                clearSearch() { App.State.query = ''; document.getElementById('searchInput').value = ''; App.UI.updateAll(); }
+                }
             },
             init() {
                 window.addEventListener('popstate', (e) => App.Core.goBack(true));
-                document.getElementById('searchInput').addEventListener('input', e => { 
-                    App.State.query = e.target.value; 
-                    document.getElementById('btnClearSearch').classList.toggle('hidden', !e.target.value);
-                    App.UI.updateAll(); 
-                });
-                App.UI.updateAll(); // تحميل الواجهة فوراً
+                document.getElementById('searchInput').addEventListener('input', e => { App.State.query = e.target.value; App.UI.updateAll(); });
+                App.UI.updateAll();
             }
         };
         App.init();
