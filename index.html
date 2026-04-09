@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>قسم الإنتاج | V22 Reorder & Search</title>
+    <title>قسم الإنتاج | V23 Stable</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -32,7 +32,7 @@
       signInAnonymously(auth).then(() => {
           window.cloudDB = { db, ref, set, onValue, remove, update };
           App.UI.syncWithCloud();
-      }).catch(err => console.error("Cloud Error"));
+      }).catch(err => alert("خطأ في الاتصال بالسحابة"));
     </script>
 
     <style>
@@ -43,17 +43,16 @@
         .form-input { width: 100%; display: block; background: #FFFFFF; border: 1px solid #D1D5DB; padding: 12px 16px; border-radius: 12px; font-size: 14px; }
         .form-input:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 12px center; background-size: 16px; padding-left: 40px; }
-        .sheet-container { transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: white; border-top-left-radius: 28px; border-top-right-radius: 28px; }
+        .sheet-container { transform: translateY(100%); transition: transform 0.3s ease-out; position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: white; border-top-left-radius: 28px; border-top-right-radius: 28px; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); }
         .sheet-container.is-open { transform: translateY(0); }
         .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 40; backdrop-filter: blur(2px); }
         .sheet-overlay.is-open { opacity: 1; pointer-events: auto; }
-        @keyframes shift-pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); border-color: #10b981; } 70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); border-color: #10b981; } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); border-color: #10b981; } }
+        @keyframes shift-pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); } 70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
         .active-shift-ring { animation: shift-pulse 2s infinite; background-color: #ecfdf5 !important; border: 2px solid #10b981 !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .list-item { animation: fadeIn 0.3s ease forwards; user-select: none; }
+        .list-item { animation: fadeIn 0.3s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .hidden { display: none !important; }
-        .reorder-mode .sort-btn { display: flex !important; }
     </style>
 </head>
 <body class="pb-safe pt-safe">
@@ -61,11 +60,11 @@
     <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div class="h-16 px-5 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <button id="btnBack" onclick="App.Core.goBack(false)" class="hidden w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-all"><i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+                <button id="btnBack" onclick="window.history.back()" class="hidden w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-all"><i data-lucide="arrow-right" class="w-5 h-5"></i></button>
                 <h1 id="uiMainTitle" class="text-lg font-bold text-gray-900">قسم الإنتاج</h1>
             </div>
             <div class="flex items-center gap-2">
-                <button id="btnWipe" onclick="App.Core.wipeAllData()" class="hidden w-10 h-10 rounded-xl bg-red-50 text-red-600 items-center justify-center"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                <button id="btnWipe" onclick="App.Core.wipeAllData()" class="hidden w-10 h-10 rounded-xl bg-red-50 text-red-600 items-center justify-center border border-red-100"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
                 <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100"><i data-lucide="factory" class="w-5 h-5 text-gray-700"></i></div>
             </div>
         </div>
@@ -78,17 +77,18 @@
     </header>
 
     <main id="mainContent" class="px-5 py-4 pb-32">
-        <p class="text-center text-gray-400 py-20">جاري الاتصال بالسحابة...</p>
+        <p class="text-center text-gray-400 py-20">جاري مزامنة البيانات...</p>
     </main>
 
     <button id="fabAdd" onclick="App.UI.openFormModal()" class="hidden fixed bottom-8 left-6 z-20 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"><i data-lucide="plus" class="w-7 h-7"></i></button>
 
-    <div id="modalOverlay" class="sheet-overlay" onclick="App.UI.closeAllModals()"></div>
+    <div id="modalOverlay" class="sheet-overlay" onclick="window.history.back()"></div>
 
+    <!-- FORM SHEET -->
     <div id="sheetForm" class="sheet-container overflow-hidden">
         <div class="p-6 flex justify-between items-center border-b border-gray-100">
-            <h2 id="uiFormTitle" class="text-lg font-bold text-gray-900">بيانات الموظف</h2>
-            <button onclick="App.UI.closeAllModals()" class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-500"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <h2 id="uiFormTitle" class="text-lg font-bold">بيانات الموظف</h2>
+            <button onclick="window.history.back()" class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-500"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="p-6 overflow-y-auto max-h-[80vh] no-scrollbar pb-20">
             <form id="formEmployee" onsubmit="App.Core.saveEmployee(event)">
@@ -107,12 +107,12 @@
         </div>
     </div>
 
+    <!-- DETAILS SHEET -->
     <div id="sheetDetails" class="sheet-container p-8 shadow-2xl"><div id="uiDetailsContent"></div></div>
 
     <script>
         const App = {
             isAdmin: new URLSearchParams(window.location.search).get('mode') === 'admin',
-            pressTimer: null,
             isReorderMode: false,
             Config: {
                 deptMap: { 'rolling': 'خطوط الدرفلة', 'prep': 'تجهيزات', 'management': 'إدارة الإنتاج' },
@@ -152,20 +152,20 @@
                     const { db, ref, onValue } = window.cloudDB;
                     onValue(ref(db, 'employees'), (snapshot) => {
                         const data = snapshot.val();
-                        // ترتيب الموظفين حسب حقل sortOrder
                         const list = data ? Object.values(data).filter(e => e && e.name) : [];
+                        // ترتيب البيانات حسب الحقل sortOrder
                         App.State.employees = list.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
                         App.UI.updateAll(false);
                     });
                 },
 
-                updateAll(pushState = true) {
-                    const { view, shift, query, employees } = App.State;
+                updateAll(pushToHistory = true) {
+                    const { view, shift, query, employees, isModalOpen } = App.State;
                     const live = App.ShiftEngine.getLiveNow();
                     
                     let html = '';
                     if (query) html = this.renderSearch(query);
-                    else if (shift) html = this.renderEmployeeList(view, shift);
+                    else if (shift) html = this.renderEmployeeList(view, shift, live.group);
                     else if (view !== 'home') html = this.renderShiftMenu(view, live.group);
                     else html = this.renderHome(employees, live);
 
@@ -176,7 +176,10 @@
                     document.getElementById('uiMainTitle').innerText = query ? 'البحث' : (shift === 'office' ? 'طاقم الإدارة' : shift ? `وردية ${shift}` : 'قسم الإنتاج');
                     
                     lucide.createIcons();
-                    if (pushState) history.pushState({ view, shift, query, modal: App.State.isModalOpen }, "");
+
+                    if (pushToHistory) {
+                        history.pushState({ view, shift, query, modal: isModalOpen }, "");
+                    }
                 },
 
                 renderHome(employees, live) {
@@ -212,55 +215,49 @@
                     return `<h3 class="text-xs font-bold text-gray-500 uppercase mb-3 mr-1">اختر الوردية</h3><div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">${html}</div>`;
                 },
 
-                renderEmployeeList(view, shift) {
+                renderEmployeeList(view, shift, liveGroup) {
                     const filtered = App.State.employees.filter(e => e.shift === shift && (view==='management'?e.department==='management':view==='prep'?e.department==='prep':e.line===view.replace('line','')));
-                    if(!filtered.length) return `<div class="py-20 text-center text-gray-400 font-bold">لا يوجد موظفين مسجلين</div>`;
                     
-                    return `<div class="${App.isReorderMode ? 'reorder-mode' : ''} space-y-2">` + 
-                        filtered.map((e, index) => `
-                        <div 
-                            onmousedown="App.UI.startPress('${e.uid}')" 
-                            onmouseup="App.UI.cancelPress()" 
-                            ontouchstart="App.UI.startPress('${e.uid}')" 
-                            ontouchend="App.UI.cancelPress()"
-                            class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm active:scale-95 transition-transform list-item">
+                    const sortIcon = App.isAdmin ? `<button onclick="App.UI.toggleReorderMode()" class="p-2 ${App.isReorderMode?'text-blue-600 bg-blue-50':'text-gray-400'} rounded-lg"><i data-lucide="arrow-up-down" class="w-4 h-4"></i></button>` : '';
+
+                    let header = `<div class="flex justify-between items-center mb-3 mr-1">
+                        <h3 class="text-xs font-bold text-gray-500 uppercase">قائمة الموظفين</h3>
+                        ${sortIcon}
+                    </div>`;
+
+                    if(!filtered.length) return header + `<div class="py-20 text-center text-gray-400 font-bold">لا يوجد موظفين مسجلين</div>`;
+                    
+                    return header + `<div class="space-y-2">` + filtered.map((e, idx) => `
+                        <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm active:scale-95 transition-transform list-item">
                             <div class="flex items-center gap-4 flex-1" onclick="if(!App.isReorderMode) App.UI.openDetails('${e.uid}')">
                                 <div class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 font-bold">${e.shift==='office'?'إدارة':e.shift}</div>
                                 <div><h3 class="font-bold text-sm text-gray-900">${e.name}</h3><p class="text-xs text-gray-500 font-medium">${e.jobTitle} ${e.code?'| '+e.code:''}</p></div>
                             </div>
-                            <!-- أزرار الترتيب تظهر فقط في وضع الترتيب -->
-                            <div class="sort-btn hidden flex-col gap-1">
-                                <button onclick="App.Core.moveEmployee('${e.uid}', -1)" class="p-1 bg-gray-100 rounded-md text-gray-600"><i data-lucide="chevron-up" class="w-4 h-4"></i></button>
-                                <button onclick="App.Core.moveEmployee('${e.uid}', 1)" class="p-1 bg-gray-100 rounded-md text-gray-600"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
-                            </div>
-                            <i data-lucide="chevron-left" class="w-5 h-5 text-gray-200 ${App.isReorderMode ? 'hidden' : ''}"></i>
-                        </div>`).join('') + `</div>` + 
-                        (App.isReorderMode ? `<button onclick="App.UI.toggleReorderMode()" class="w-full mt-4 py-2 bg-gray-800 text-white rounded-xl text-xs font-bold">تم الانتهاء من الترتيب</button>` : '');
+                            ${App.isReorderMode ? `
+                            <div class="flex flex-col gap-1">
+                                <button onclick="App.Core.moveEmployee('${e.uid}', -1)" class="p-1 bg-gray-50 rounded border border-gray-100"><i data-lucide="chevron-up" class="w-4 h-4"></i></button>
+                                <button onclick="App.Core.moveEmployee('${e.uid}', 1)" class="p-1 bg-gray-50 rounded border border-gray-100"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
+                            </div>` : `<i data-lucide="chevron-left" class="w-5 h-5 text-gray-200"></i>`}
+                        </div>`).join('') + `</div>`;
                 },
 
                 renderSearch(q) {
                     const filtered = App.State.employees.filter(e => e.name.toLowerCase().includes(q.toLowerCase()) || (e.code && e.code.toString().includes(q)));
+                    if(!filtered.length) return `<div class="py-20 text-center text-gray-400">لا توجد نتائج</div>`;
                     return filtered.map(e => `
                         <div onclick="App.Core.clearSearchAndOpen('${e.uid}')" class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm active:scale-95 transition-transform mb-2">
                             <div class="flex items-center gap-4"><div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 font-bold">${e.shift==='office'?'AD':e.shift}</div><div><h3 class="font-bold text-sm">${e.name}</h3><p class="text-[10px] text-gray-400 font-bold">${App.Config.deptMap[e.department]}</p></div></div><i data-lucide="chevron-left" class="w-4 h-4 text-gray-200"></i>
                         </div>`).join('');
                 },
 
-                startPress(uid) {
-                    if (!App.isAdmin) return;
-                    App.pressTimer = setTimeout(() => App.UI.toggleReorderMode(), 800);
+                toggleAccordion(id) {
+                    const el = document.getElementById(id); el.classList.toggle('hidden');
+                    document.getElementById('iconRolling').style.transform = el.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
                 },
-
-                cancelPress() { clearTimeout(App.pressTimer); },
 
                 toggleReorderMode() {
                     App.isReorderMode = !App.isReorderMode;
                     App.UI.updateAll(false);
-                },
-
-                toggleAccordion(id) {
-                    const el = document.getElementById(id); el.classList.toggle('hidden');
-                    document.getElementById('iconRolling').style.transform = el.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
                 },
 
                 openFormModal(uid = null) {
@@ -288,11 +285,12 @@
                     App.Core.handleDeptChange();
                     document.getElementById('modalOverlay').classList.add('is-open');
                     document.getElementById('sheetForm').classList.add('is-open');
-                    App.UI.updateAll();
+                    App.UI.updateAll(true);
                 },
 
                 openDetails(uid) {
-                    App.State.isModalOpen = true; const e = App.State.employees.find(x => x.uid == uid);
+                    App.State.isModalOpen = true; 
+                    const e = App.State.employees.find(x => x.uid == uid);
                     const waLink = `https://wa.me/2${e.phone.replace(/\s+/g, '')}`;
                     const phones = e.department === 'management' ? `
                         <div class="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-2xl">
@@ -314,7 +312,7 @@
                     
                     document.getElementById('modalOverlay').classList.add('is-open');
                     document.getElementById('sheetDetails').classList.add('is-open');
-                    App.UI.updateAll();
+                    App.UI.updateAll(true);
                 },
 
                 closeAllModals() {
@@ -333,21 +331,6 @@
                 },
                 navigateShift(s) { App.State.shift = s; App.UI.updateAll(); },
                 
-                goBack(byPopState = true) {
-                    if (App.State.isModalOpen) {
-                        App.UI.closeAllModals();
-                        if (!byPopState) window.history.back();
-                    } else if (App.State.query) {
-                        this.clearSearch();
-                    } else if (App.State.shift) {
-                        if (App.State.view === 'management') { App.State.view = 'home'; App.State.shift = null; }
-                        else App.State.shift = null;
-                    } else if (App.State.view !== 'home') {
-                        App.State.view = 'home';
-                    }
-                    App.UI.updateAll(false);
-                },
-
                 clearSearchAndOpen(uid) {
                     App.State.query = '';
                     document.getElementById('searchInput').value = '';
@@ -372,9 +355,7 @@
                     if(!window.cloudDB) return alert('خطأ في الاتصال');
                     const uid = document.getElementById('inpId').value || "ID-"+Date.now();
                     const dept = document.getElementById('inpDept').value;
-                    
-                    // حساب ترتيب تلقائي (في نهاية القائمة) للموظف الجديد
-                    const lastOrder = App.State.employees.length > 0 ? Math.max(...App.State.employees.map(e => e.sortOrder || 0)) : 0;
+                    const lastOrder = App.State.employees.length ? Math.max(...App.State.employees.map(e => e.sortOrder || 0)) : 0;
 
                     const emp = {
                         uid, name: document.getElementById('inpName').value.trim(),
@@ -401,8 +382,11 @@
                     const swapEmp = viewData[newIndex];
 
                     const updates = {};
-                    updates[`employees/${currentEmp.uid}/sortOrder`] = swapEmp.sortOrder || 0;
-                    updates[`employees/${swapEmp.uid}/sortOrder`] = currentEmp.sortOrder || 0;
+                    const oldOrder = currentEmp.sortOrder || 0;
+                    const newOrder = swapEmp.sortOrder || 0;
+
+                    updates[`employees/${currentEmp.uid}/sortOrder`] = newOrder;
+                    updates[`employees/${swapEmp.uid}/sortOrder`] = oldOrder;
 
                     window.cloudDB.update(window.cloudDB.ref(window.cloudDB.db), updates);
                 },
@@ -420,32 +404,31 @@
                     }
                 },
 
-                clearSearch() { 
-                    App.State.query = ''; 
-                    document.getElementById('searchInput').value = ''; 
-                    App.Core.goBack(false); 
-                }
+                clearSearch() { App.State.query = ''; document.getElementById('searchInput').value = ''; App.UI.updateAll(false); }
             },
 
             init() {
                 window.addEventListener('popstate', (e) => {
-                    if (App.State.query) { App.Core.clearSearch(); return; }
-                    App.Core.handleBackNavigation(e.state);
+                    if (e.state) {
+                        App.State.view = e.state.view;
+                        App.State.shift = e.state.shift;
+                        App.State.query = e.state.query;
+                        App.State.isModalOpen = e.state.modal;
+                    } else {
+                        App.State.view = 'home';
+                        App.State.shift = null;
+                        App.State.query = '';
+                        App.State.isModalOpen = false;
+                    }
+                    App.UI.closeAllModals();
+                    App.UI.updateAll(false);
                 });
+
                 document.getElementById('searchInput').addEventListener('input', e => { 
                     App.State.query = e.target.value; 
-                    App.UI.updateAll(); 
+                    App.UI.updateAll(true); 
                 });
-                App.UI.updateAll();
-            },
-            
-            handleBackNavigation(state) {
-                if (!state) {
-                    App.State.view = 'home'; App.State.shift = null; App.State.query = ''; App.State.isModalOpen = false;
-                } else {
-                    App.State.view = state.view; App.State.shift = state.shift; App.State.query = state.query; App.State.isModalOpen = state.modal;
-                }
-                if (!App.State.isModalOpen) App.UI.closeAllModals();
+
                 App.UI.updateAll(false);
             }
         };
